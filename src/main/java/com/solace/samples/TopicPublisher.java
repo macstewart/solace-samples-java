@@ -27,13 +27,14 @@ import com.solacesystems.jcsmp.JCSMPStreamingPublishEventHandler;
 import com.solacesystems.jcsmp.TextMessage;
 import com.solacesystems.jcsmp.Topic;
 import com.solacesystems.jcsmp.XMLMessageProducer;
+import org.apache.commons.lang.StringUtils;
 
 public class TopicPublisher {
 
     public static void main(String... args) throws JCSMPException {
 
         // Check command line arguments
-        if (args.length != 3 || args[1].split("@").length != 2) {
+        if (args.length != 4 || args[1].split("@").length != 2) {
             System.out.println("Usage: TopicPublisher <host:port> <client-username@message-vpn> <client-password>");
             System.out.println();
             System.exit(-1);
@@ -59,6 +60,8 @@ public class TopicPublisher {
         properties.setProperty(JCSMPProperties.VPN_NAME,  args[1].split("@")[1]); // message-vpn
         final JCSMPSession session =  JCSMPFactory.onlyInstance().createSession(properties);
 
+        int messageSizeBytes = Integer.parseInt(args[3]);
+
         session.connect();
 
         final Topic topic = JCSMPFactory.onlyInstance().createTopic("tutorial/topic");
@@ -78,7 +81,7 @@ public class TopicPublisher {
         // Publish-only session is now hooked up and running!
 
         TextMessage msg = JCSMPFactory.onlyInstance().createMessage(TextMessage.class);
-        final String text = "Hello world!";
+        final String text = StringUtils.repeat("*", messageSizeBytes);
         msg.setText(text);
         System.out.printf("Connected. About to send message '%s' to topic '%s'...%n",text,topic.getName());
         prod.send(msg,topic);
